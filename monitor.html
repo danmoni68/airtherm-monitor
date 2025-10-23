@@ -128,6 +128,14 @@
 
         data.forEach(v => {
           const row = document.createElement('tr');
+
+          try {
+            if (!v || !v.timestamp) continue;
+            new Date(v.timestamp).toISOString()
+          } catch (err) {
+            continue
+          }
+
           row.innerHTML = `
             <td>${montrealTime.format(new Date(v.timestamp))}</td>
             <td>${v.ip || '-'}</td>
