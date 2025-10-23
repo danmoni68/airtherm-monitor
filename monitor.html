@@ -130,10 +130,10 @@
           const row = document.createElement('tr');
 
           try {
-            if (!v || !v.timestamp) continue;
+            if (!v || !v.timestamp) return;
             new Date(v.timestamp).toISOString()
           } catch (err) {
-            continue
+            return
           }
 
           row.innerHTML = `
