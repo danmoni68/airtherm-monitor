@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visitor Monitor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f6fa;
+      color: #222;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+      cursor: pointer;
+    }
+
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    .footer {
+      text-align: center;
+      color: #777;
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+
+    #loading {
+      text-align: center;
+      font-size: 1.2em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌎 Real-Time Visitor Monitor</h1>
+
+  <div class="stats">
+    <div>Total Visits: <span id="total">0</span></div>
+    <div>Unique Countries: <span id="countries">0</span></div>
+    <div>Last Update: <span id="lastUpdate">-</span></div>
+  </div>
+
+  <div id="loading">Loading data...</div>
+
+  <table id="visitsTable" style="display:none;">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Timestamp (Montreal)</th>
+        <th onclick="sortTable(1)">IP</th>
+        <th onclick="sortTable(2)">Country</th>
+        <th onclick="sortTable(3)">City</th>
+        <th onclick="sortTable(4)">Path</th>
+        <th onclick="sortTable(5)">Language</th>
+        <th onclick="sortTable(6)">Screen</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="footer">Auto-refresh every 10 seconds • Timezone: America/Toronto</div>
+
+  <script>
+    // --- Detect API URL automatically ---
+    const API_URL = `${window.location.origin}/visits`;
+
+    async function loadVisits() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (!data || data.length === 0) {
+          document.getElementById('loading').textContent = 'No visits logged yet.';
+          document.getElementById('total').textContent = 0;
+          document.getElementById('countries').textContent = 0;
+          document.getElementById('lastUpdate').textContent = '-';
+          return;
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('visitsTable').style.display = 'table';
+
+        const tableBody = document.querySelector('#visitsTable tbody');
+        tableBody.innerHTML = '';
+
+        const montrealTime = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'America/Toronto',
+          dateStyle: 'medium',
+          timeStyle: 'medium'
+        });
+
+        data.forEach(v => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${montrealTime.format(new Date(v.timestamp))}</td>
+            <td>${v.ip || '-'}</td>
+            <td>${v.country || '-'}</td>
+            <td>${v.city || '-'}</td>
+            <td>${v.path || '-'}</td>
+            <td>${v.language || '-'}</td>
+            <td>${v.screen?.width ? `${v.screen.width}x${v.screen.height}` : '-'}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+        // --- Stats update ---
+        const total = data.length;
+        const uniqueCountries = new Set(data.map(v => v.country).filter(Boolean)).size;
+        document.getElementById('total').textContent = total;
+        document.getElementById('countries').textContent = uniqueCountries;
+        document.getElementById('lastUpdate').textContent =
+          new Date().toLocaleTimeString('en-CA', { timeZone: 'America/Toronto' });
+
+      } catch (err) {
+        console.error('⚠️ Failed to load visits:', err);
+        document.getElementById('loading').textContent =
+          '⚠️ Failed to load data. Check server.';
+      }
+    }
+
+    // --- Table sorting ---
+    function sortTable(n) {
+      const table = document.getElementById("visitsTable");
+      let switching = true, dir = "asc", switchcount = 0;
+      while (switching) {
+        switching = false;
+        const rows = table.rows;
+        for (let i = 1; i < rows.length - 1; i++) {
+          let shouldSwitch = false;
+          const x = rows[i].getElementsByTagName("TD")[n];
+          const y = rows[i + 1].getElementsByTagName("TD")[n];
+          if (dir === "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) shouldSwitch = true;
+          if (dir === "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) shouldSwitch = true;
+          if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+            break;
+          }
+        }
+        if (switchcount === 0 && dir === "asc") { dir = "desc"; switching = true; }
+      }
+    }
+
+    // --- Auto refresh ---
+    loadVisits();
+    setInterval(loadVisits, 10000);
+  </script>
+</body>
+</html>

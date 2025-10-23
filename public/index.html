@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <title>Pagina mea monitorizată</title>
+</head>
+<body>
+  <h1>Bun venit pe pagina mea!</h1>
+  <p>Acesta este un test de monitorizare vizite.</p>
+
+  <script>
+    (function sendBeacon() {
+      const data = {
+        path: location.pathname + location.search + location.hash,
+        referrer: document.referrer || null,
+        screen: { width: screen.width, height: screen.height },
+        language: navigator.language || null
+      };
+      const url = '/beacon';
+      if (navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+      } else {
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          keepalive: true
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

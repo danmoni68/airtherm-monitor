@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitorizare vizite – Air-Therm</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f9fafc;
+      color: #333;
+      padding: 20px;
+    }
+    h1 { color: #0066cc; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background-color: #e9eef5;
+    }
+    tr:nth-child(even) {
+      background-color: #f4f6f8;
+    }
+    .stats {
+      margin: 15px 0;
+      background: #fff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Statistici vizite – Air-Therm</h1>
+  <div class="stats" id="stats"></div>
+  <table id="visitsTable">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Pagina</th>
+        <th>Referrer</th>
+        <th>Limba</th>
+        <th>Ecran</th>
+        <th>Browser</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

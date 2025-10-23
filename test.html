@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Tracking</title>
+</head>
+<body>
+  <h2>📄 Pagina de test pentru tracking</h2>
+  <p>Dacă totul merge, serverul tău va primi un mesaj JSON cu detalii despre vizită.</p>
+
+  <script>
+    // endpoint-ul serverului local
+    const endpoint = " https://unstifled-nonegoistically-eladia.ngrok-free.dev";
+
+    // Trimite o cerere POST către server
+    fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        test: "merge",
+        browser: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+        page: window.location.href
+      })
+    })
+    .then(response => console.log("✅ Răspuns primit:", response.status))
+    .catch(err => console.error("❌ Eroare:", err));
+  </script>
+</body>
+</html>
