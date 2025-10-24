@@ -7,7 +7,7 @@ const axios = require('axios');
 const app = express();
 
 // --- Settings ---
-app.set('trust proxy', true); // permite citirea IP-ului real când e proxiat (ex: prin ngrok)
+app.set('trust proxy', true);
 
 // --- Middleware ---
 const allowedOrigins = [
@@ -34,18 +34,19 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(express.static(__dirname)); // Servește fișierele statice (ex: monitor.html)
+app.use(express.static(__dirname)); // Servește fișierele statice
 
-// --- Helper: get approximate location by IP (with fallback & higher accuracy) ---
+// --- Helper: get approximate location by IP (now includes postal code) ---
 async function getGeoInfo(ip) {
   try {
-    // 🌍 Try first with ipwho.is (better accuracy in North America)
+    // 🌍 First try ipwho.is
     const res = await axios.get(`https://ipwho.is/${ip}`);
     if (res.data && res.data.success) {
       return {
         ip: ip,
         country: res.data.country || 'Unknown',
         city: res.data.city || 'Unknown',
+        postal: res.data.postal || 'Unknown' // ✅ Added postal
       };
     } else {
       console.warn('⚠️ ipwho.is failed, trying fallback (ipapi.co)...');
@@ -54,20 +55,20 @@ async function getGeoInfo(ip) {
     console.warn('⚠️ Error contacting ipwho.is:', err.message);
   }
 
-  // 🌎 Fallback: ipapi.co (less precise but reliable)
+  // 🌎 Fallback: ipapi.co
   try {
     const fallback = await axios.get(`https://ipapi.co/${ip}/json/`);
     return {
       ip: ip,
       country: fallback.data.country_name || 'Unknown',
       city: fallback.data.city || 'Unknown',
+      postal: fallback.data.postal || 'Unknown' // ✅ Added postal
     };
   } catch (err2) {
     console.warn('⚠️ Fallback (ipapi.co) also failed:', err2.message);
-    return { ip, country: 'Unknown', city: 'Unknown' };
+    return { ip, country: 'Unknown', city: 'Unknown', postal: 'Unknown' }; // ✅ Added postal
   }
 }
-
 
 // --- Root route ---
 app.get('/', (req, res) => {
@@ -91,6 +92,7 @@ app.post('/track', async (req, res) => {
     ip: geo.ip,
     country: geo.country,
     city: geo.city,
+    postal: geo.postal, // ✅ Added postal
     timestamp: new Date().toISOString(),
   };
 
