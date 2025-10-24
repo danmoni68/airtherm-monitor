@@ -98,6 +98,16 @@ app.post('/track', async (req, res) => {
 
   const logFile = path.join(__dirname, 'visits.log');
   fs.appendFileSync(logFile, JSON.stringify(record) + '\n', 'utf8');
+  // --- Trimite și către Google Sheet ---
+try {
+  await axios.post(
+    'https://script.google.com/macros/s/AKfycbw7KlQVZNVBVvrxFFpSqR9rt6cHido4ownu4yG2Y6nkHtwGNv06pu1YGyV_EqFJkqiu/exec',
+    record
+  );
+  console.log('📤 Trimis și în Google Sheet');
+} catch (err) {
+  console.warn('⚠️ Nu s-a putut trimite în Google Sheet:', err.message);
+}
 
   console.log('💾 Saved visit:', record);
   res.status(200).json({ message: 'OK' });
