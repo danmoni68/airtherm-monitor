@@ -86,9 +86,10 @@
         <th onclick="sortTable(1)">IP</th>
         <th onclick="sortTable(2)">Country</th>
         <th onclick="sortTable(3)">City</th>
-        <th onclick="sortTable(4)">Path</th>
-        <th onclick="sortTable(5)">Language</th>
-        <th onclick="sortTable(6)">Screen</th>
+        <th onclick="sortTable(4)">Postal</th>
+        <th onclick="sortTable(5)">Path</th>
+        <th onclick="sortTable(6)">Language</th>
+        <th onclick="sortTable(7)">Screen</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -141,6 +142,7 @@
             <td>${v.ip || '-'}</td>
             <td>${v.country || '-'}</td>
             <td>${v.city || '-'}</td>
+             <td>${v.postal || '-'}</td>
             <td>${v.path || '-'}</td>
             <td>${v.language || '-'}</td>
             <td>${v.screen?.width ? `${v.screen.width}x${v.screen.height}` : '-'}</td>
