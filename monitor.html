@@ -66,6 +66,15 @@
       font-size: 1.2em;
       color: #666;
     }
+
+    a.map-link {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a.map-link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -90,6 +99,7 @@
         <th onclick="sortTable(5)">Path</th>
         <th onclick="sortTable(6)">Language</th>
         <th onclick="sortTable(7)">Screen</th>
+        <th onclick="sortTable(8)">GPS (Map)</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -98,7 +108,6 @@
   <div class="footer">Auto-refresh every 10 seconds • Timezone: America/Toronto</div>
 
   <script>
-    // --- Detect API URL automatically ---
     const API_URL = `${window.location.origin}/visits`;
 
     async function loadVisits() {
@@ -132,25 +141,32 @@
 
           try {
             if (!v || !v.timestamp) return;
-            new Date(v.timestamp).toISOString()
-          } catch (err) {
-            return
+            new Date(v.timestamp).toISOString();
+          } catch {
+            return;
           }
+
+          const gpsCell = v.gps && v.gps.latitude && v.gps.longitude
+            ? `<a class="map-link" href="https://www.google.com/maps?q=${v.gps.latitude},${v.gps.longitude}" target="_blank">
+                ${v.gps.latitude}, ${v.gps.longitude}
+              </a>`
+            : '-';
 
           row.innerHTML = `
             <td>${montrealTime.format(new Date(v.timestamp))}</td>
             <td>${v.ip || '-'}</td>
             <td>${v.country || '-'}</td>
             <td>${v.city || '-'}</td>
-             <td>${v.postal || '-'}</td>
+            <td>${v.postal || '-'}</td>
             <td>${v.path || '-'}</td>
             <td>${v.language || '-'}</td>
             <td>${v.screen?.width ? `${v.screen.width}x${v.screen.height}` : '-'}</td>
+            <td>${gpsCell}</td>
           `;
+
           tableBody.appendChild(row);
         });
 
-        // --- Stats update ---
         const total = data.length;
         const uniqueCountries = new Set(data.map(v => v.country).filter(Boolean)).size;
         document.getElementById('total').textContent = total;
@@ -165,7 +181,6 @@
       }
     }
 
-    // --- Table sorting ---
     function sortTable(n) {
       const table = document.getElementById("visitsTable");
       let switching = true, dir = "asc", switchcount = 0;
@@ -189,7 +204,6 @@
       }
     }
 
-    // --- Auto refresh ---
     loadVisits();
     setInterval(loadVisits, 10000);
   </script>
